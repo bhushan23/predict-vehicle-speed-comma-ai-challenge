@@ -33,8 +33,9 @@ def get_data_set_split(dir, label_file, validation_split):
     
     # Build custom datasets
     transform = transforms.Compose([
-                transforms.ToTensor() #,
-                # transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+                transforms.CenterCrop((250, 450)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
             ])
     train_dataset = DrivingDataset(train_images, train_labels, transform = transform)
     val_dataset = DrivingDataset(val_images, val_labels, transform = transform)
@@ -43,22 +44,27 @@ def get_data_set_split(dir, label_file, validation_split):
     
 
 class DrivingDataset(Dataset):
-    def __init__(self, images, labels, transform, is_test = False):
+    def __init__(self, images, labels, transform, num_of_images = 2, is_test = False):
         self.images = images
         self.labels = labels
         self.is_test = is_test
         self.transform = transform
+        self.num_of_images = num_of_images
     
     def __getitem__(self, index):
-        #img = io.imread(self.images[index])
+        # img = io.imread(self.images[index])
         # img = cv2.imread(self.images[index], )
         img = Image.open(self.images[index])
-        img = img.crop((0, 200, 0, 300))
         img = self.transform(img)
+
+        for i in range(1, self.num_of_images):
+            temp = self.transform(Image.open(self.images[index+i]))
+            img  = torch.cat((img, temp))
+
         if self.is_test:
            return img, None
-        label = self.labels[index]
+        label = self.labels[index + self.num_of_images - 1]
         return img, label
 
     def __len__(self):
-        return len(self.images)
+        return len(self.images) - self.num_of_images

@@ -6,7 +6,7 @@ def denorm(x):
     return out.clamp(0, 1)
 
 def save_image(pic, path=None):
-    # pic = denorm(pic)
+    pic = denorm(pic)
     grid = torchvision.utils.make_grid(pic, nrow=8, padding=2)
     ndarr = grid.mul(255).clamp(0, 255).byte().permute(1, 2, 0).cpu().numpy()
     if path == None:
