@@ -47,6 +47,20 @@ def get_data_set_split(dir, label_file, validation_split):
     return train_dataset, val_dataset
     
 
+def get_test_dataset(dir):
+    images = []
+
+    for img in sorted(glob.glob(dir + '/*.jpg'), key=os.path.getmtime):
+        images.append(img)
+
+    transform = transforms.Compose([
+                transforms.CenterCrop((HEIGHT, WIDTH)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+            ])
+    test_dataset = DrivingDataset(images, None, transform = transform, is_test=True)
+    return test_dataset
+
 class DrivingDataset(Dataset):
     def __init__(self, images, labels, transform, num_of_images = 2, is_test = False):
         self.images = images
