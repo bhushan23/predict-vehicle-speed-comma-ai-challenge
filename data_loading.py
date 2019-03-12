@@ -84,7 +84,8 @@ class DrivingDataset(Dataset):
                 img  = torch.cat((img, temp))
 
         if self.is_test:
-           return img, None
+           return img
+
         label = self.labels[index]
         return img, label
 
