@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from data_loading import *
 from models import *
 from utils import *
+from train import *
 
 # initialization
 train_data = './data/train/'
@@ -19,8 +20,8 @@ if torch.cuda.is_available():
 # data processing
 train_dataset, val_dataset = get_data_set_split(train_data, label_file, 10)
 
-train_dl = DataLoader(train_dataset, batch_size = 1)
-val_dl   = DataLoader(val_dataset, batch_size = 1)
+train_dl = DataLoader(train_dataset, batch_size = 5)
+val_dl   = DataLoader(val_dataset, batch_size = 5)
 
 # Debugging show few images
 img, label = next(iter(train_dl))
@@ -33,5 +34,5 @@ print(img.shape)
 # save_image(img)
 
 # training
-model = DeepVO(img_w, img_h) #.type(device_type)
-# train(model, train_dl, val_dl)
+model = DeepVO_small(img_w, img_h).to(device_type)
+train(model, train_dl, val_dl, device_type = device_type)

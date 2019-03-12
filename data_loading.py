@@ -9,6 +9,10 @@ import os
 from skimage import io
 from PIL import Image
 
+HEIGHT = 250
+WIDTH = 450
+
+
 def get_data_set_split(dir, label_file, validation_split):
     images = []
     labels = []
@@ -33,7 +37,7 @@ def get_data_set_split(dir, label_file, validation_split):
     
     # Build custom datasets
     transform = transforms.Compose([
-                transforms.CenterCrop((250, 450)),
+                transforms.CenterCrop((HEIGHT, WIDTH)),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
             ])
@@ -54,17 +58,21 @@ class DrivingDataset(Dataset):
     def __getitem__(self, index):
         # img = io.imread(self.images[index])
         # img = cv2.imread(self.images[index], )
-        img = Image.open(self.images[index])
-        img = self.transform(img)
+        img = None
+        if index - self.num_of_images + 1 < 0:
+            img = torch.zeros(abs(index - self.num_of_images + 1) * 3, HEIGHT, WIDTH)
 
-        for i in range(1, self.num_of_images):
-            temp = self.transform(Image.open(self.images[index+i]))
-            img  = torch.cat((img, temp))
+        for i in range(max(0, index - self.num_of_images + 1), index + 1):
+            temp = self.transform(Image.open(self.images[i]))
+            if img is None:
+                img = temp
+            else:
+                img  = torch.cat((img, temp))
 
         if self.is_test:
            return img, None
-        label = self.labels[index + self.num_of_images - 1]
+        label = self.labels[index]
         return img, label
 
     def __len__(self):
-        return len(self.images) - self.num_of_images
+        return len(self.images) # - self.num_of_images
